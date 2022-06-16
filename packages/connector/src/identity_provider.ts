@@ -1,6 +1,6 @@
 import { Class, META_DATA_SET, Providers } from "@almight-sdk/utils";
 import { BaseChainAdapter } from "./adapter";
-import { KardiaChainAdapter } from "./adapters";
+import { CoinbaseWalletAdapter, KardiaChainAdapter } from "./adapters";
 import { MetaMaskAdapter } from "./adapters";
 import { BaseProviderChannel, BrowserProviderChannel, WalletConnectChannel } from "./channel";
 import { BaseProtocolDefination } from "./protocol_definition";
@@ -51,29 +51,25 @@ export class IdentityProvider implements IdentityProviderInterface {
 }
 
 
+function getConfiguredWeb3IdentityProvider(provider: Providers,data: {adapterClass: Class<BaseChainAdapter>, channels?: Class<BaseProviderChannel>[], identifier?: string, allowedConnectorTypes?: ConnectorType[]}): IdentityProvider {
+    return new IdentityProvider({
+        name: META_DATA_SET[provider].name,
+        allowedConnectorTypes: data.allowedConnectorTypes,
+        webVersion:3,
+        identifier: data.identifier ?? provider,
+        metaData: META_DATA_SET[provider],
+        adapterClass: data.adapterClass,
+        channels: data.channels ?? [BrowserProviderChannel, WalletConnectChannel]
+    });
+}
+
+
 
 const IDENTITY_PROVIDERS: Record<string, IdentityProvider> = {
-    [Providers.MetaMask]: new IdentityProvider({
-        name: META_DATA_SET[Providers.MetaMask].name,
-        webVersion: 3,
-        identifier: Providers.MetaMask,
-        metaData: {
-            icon: META_DATA_SET[Providers.MetaMask].icon
+    [Providers.MetaMask]: getConfiguredWeb3IdentityProvider(Providers.MetaMask, {adapterClass: MetaMaskAdapter}),
+    [Providers.KardiaChain]: getConfiguredWeb3IdentityProvider(Providers.KardiaChain, {adapterClass: KardiaChainAdapter}),
+    [Providers.Coinbase]: getConfiguredWeb3IdentityProvider(Providers.Coinbase, {adapterClass: CoinbaseWalletAdapter})
 
-        },
-        adapterClass: MetaMaskAdapter,
-        channels: [BrowserProviderChannel, WalletConnectChannel]
-    }),
-    [Providers.KardiaChain]: new IdentityProvider({
-        name: META_DATA_SET[Providers.KardiaChain].name,
-        webVersion: 3,
-        identifier: Providers.KardiaChain,
-        metaData: {
-            icon:META_DATA_SET[Providers.KardiaChain].icon
-        },
-        adapterClass: KardiaChainAdapter,
-        channels: [BrowserProviderChannel, WalletConnectChannel]
-    })
 }
 
 export {IDENTITY_PROVIDERS}

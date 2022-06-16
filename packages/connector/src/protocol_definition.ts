@@ -4,32 +4,13 @@ import { AccountsReturnType, BalanceReturnType, IProtocolDefinition, IProviderAd
 
 
 export class BaseProtocolDefination implements IProtocolDefinition {
-    adapter?: IProviderAdapter;
+
+    // adapter?: IProviderAdapter;
     chainIds: number[] = [];
 
-    constructor (adapter?: IProviderAdapter) {
-       if(adapter !== undefined){
-           adapter.bindProtocol(this);
-       }
-    }
 
-    bindAdapter(adapter: IProviderAdapter): void {
-        this.adapter = adapter;
-    }
-
-    /**
-     * The function will check whether the adapter is defined and connected
-     * otherwise it'll throw @error AdapterIsNotDefined
-     */
-    checkAdapter(): void {
-        if(this.adapter === undefined && this.adapter.isConnected()) throw new AdapterIsNotDefined();
-    }
-
-
-
-    async request<T = any>(args: ProviderRequestMethodArguments): Promise<T> {
-        this.checkAdapter();
-        return await this.adapter.request<T>(args);
+    async getTransactionCount(): Promise<number> {
+        throw new Error("Method not implemented.");
     }
 
     async sendTransaction(data: TransactionData): Promise<TransactionReturnType> {

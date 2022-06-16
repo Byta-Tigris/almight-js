@@ -1,10 +1,10 @@
-import { Class, isWebPlatform } from "@almight-sdk/utils";
+import { Class, isWebPlatform, Providers } from "@almight-sdk/utils";
 import { BaseChainAdapter, BaseConnector, BaseProviderChannel, ConnectorType, WalletConnectChannel } from "@almight-sdk/connector";
 import { AuthenticationApp } from "./auth";
 import { Web3AuthenticationDelegate } from "./delegate";
 import { AuthenticationAppIsNotDefinedProperly } from "./exceptions";
 import { Web3NativeOriginFrameCommunicator } from "./frame_communicator";
-import { AllowedQueryParams, AuthenticationRespondStrategy, IAuthenticationFrame, RespondMessageData, RespondType } from "./types";
+import { AllowedQueryParams, AuthenticationRespondStrategy, IAuthenticationFrame, ProviderConfiguration, RespondMessageData, RespondType } from "./types";
 import { WebConnectorModal } from "./components";
 
 
@@ -14,10 +14,21 @@ export class AuthenticationFrame implements IAuthenticationFrame {
 
     respondStrategy: AuthenticationRespondStrategy = AuthenticationRespondStrategy.None;
     app?: AuthenticationApp;
+    configs?: ProviderConfiguration;
 
     async initAuth(data: Record<string, string>): Promise<void> {
         data[AllowedQueryParams.RespondStrategy] = this.respondStrategy;
         // data[AllowedQueryParams.TargetOrigin] = globalThis.location.origin;
+    }
+
+    constructor(configs?: ProviderConfiguration){
+        this.configs = configs
+    }
+
+
+    getConfigForProvider(provider: Providers, connectorType: ConnectorType): Record<string, any> | undefined{
+        if(this.configs === undefined || this.configs[provider] === undefined) return;
+        return this.configs[provider][connectorType];
     }
 
   
@@ -97,6 +108,11 @@ export class Web3NativeAuthenticationFrame extends AuthenticationFrame {
         
     }
 
+    getConfigsForConnectorType(connectorType: ConnectorType): Record<string, any> | undefined {
+        if(this.delegate === undefined) return;
+        return this.getConfigForProvider(this.delegate.identityResolver.provider.identifier, connectorType);
+    }
+
     // Element will dispatch 'buttonclick' event on button click
     mountModal(): void {
 
@@ -109,7 +125,7 @@ export class Web3NativeAuthenticationFrame extends AuthenticationFrame {
             provider: this.delegate.identityResolver.provider.identityProviderName,
             onConnectClick:() => {
                 if (this.browserAdapter !== undefined && this.browserAdapter.channel.connectorType === ConnectorType.BrowserExtension) {
-                    this.browserAdapter.connect().catch(err => {
+                    this.browserAdapter.connect(this.getConfigsForConnectorType(ConnectorType.BrowserExtension)).catch(err => {
                         if(this.browserAdapter !== undefined && this.browserAdapter.onConnectCallback !== undefined){
                             this.connectionCount += 1;
                             this.browserAdapter?.onConnectCallback({data:{
@@ -135,7 +151,7 @@ export class Web3NativeAuthenticationFrame extends AuthenticationFrame {
             const adapter = new adapterClass({
                 channel :new channelClass(),
                 onConnect: (options?: any) => {    
-                    // TODO: Multiple connect event fire guard  
+                    // Multiple connect event fire guard  
                     if(this.connectionCount !== 0) return;
                     this.connectionCount += 1;
                     this.modal.close();
@@ -154,7 +170,7 @@ export class Web3NativeAuthenticationFrame extends AuthenticationFrame {
                     this.mountModal();
                 }
             }else if(adapter.channel.connectorType === ConnectorType.WalletConnector){
-                adapter.connect().then(() => {
+                adapter.connect(this.getConfigsForConnectorType(ConnectorType.WalletConnector)).then(() => {
                     this.walletconnectAdapter = adapter;
                     allAdaptersConnectd.push(true);
                     if(allAdaptersConnectd.length === channelClasses.length){

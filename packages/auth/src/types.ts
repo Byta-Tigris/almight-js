@@ -77,6 +77,7 @@ export interface RespondMessageData extends ResponseMessageCallbackArgument {
 export interface IAuthenticationFrame {
     respondStrategy: AuthenticationRespondStrategy;
     app?: IAuthenticationApp
+    configs?: ProviderConfiguration;
     initAuth(data: Record<string, string>): Promise<void>;
     bindListener(): void;
     close(): Promise<void>;
@@ -117,6 +118,11 @@ export interface CurrentSessionStruct <S = ISession> {
     connector_type: ConnectorType;
     session: S;
 }
+
+
+export type SingleProviderConfiguration = Record<ConnectorType, Record<string, any>>;
+
+export type ProviderConfiguration  = Record<Providers | string, SingleProviderConfiguration>
 export interface IAuthenticationApp {
     storage: BaseStorageInterface;
     connector?: BaseConnector;

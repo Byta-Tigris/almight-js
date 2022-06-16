@@ -2,7 +2,9 @@ import { BaseConnector, IDENTITY_PROVIDERS, ISession, BaseChainAdapter, Identity
 import { AlmightClient, authAxiosInstance, projectAxiosInstance } from "@almight-sdk/core";
 import { BaseStorageInterface, Class, META_DATA_SET, Providers } from "@almight-sdk/utils";
 import { AuthenticationFrame, Web3NativeAuthenticationFrame } from "./frames";
-import { IAuthenticationApp, ResponseMessageCallbackArgument, UserData, ErrorResponseMessageCallbackArgument, IAuthenticationFrame, AllowedQueryParams, ServerSentIdentityProvider, CurrentSessionStruct } from "./types";
+import { IAuthenticationApp, ResponseMessageCallbackArgument, UserData, ErrorResponseMessageCallbackArgument, IAuthenticationFrame, AllowedQueryParams, ServerSentIdentityProvider, CurrentSessionStruct, ProviderConfiguration } from "./types";
+
+
 
 export interface AuthenticationAppConstructorOptions {
     almightClient: AlmightClient;
@@ -10,6 +12,7 @@ export interface AuthenticationAppConstructorOptions {
     onSuccessCallback?: (data: ResponseMessageCallbackArgument) => void;
     onFailureCallback?: (data: ErrorResponseMessageCallbackArgument) => void;
     baseAuthenticaionURL?: string;
+    configs?: ProviderConfiguration;
 }
 
 export class AuthenticationApp implements IAuthenticationApp {
@@ -23,6 +26,7 @@ export class AuthenticationApp implements IAuthenticationApp {
     sessions: ISession[] = [];
     baseAuthenticationURL: string = "http://localhost:3000"
     token?: string;
+    readonly configs?: ProviderConfiguration;
 
     readonly userKeyName = "almight_user";
     readonly userIdpsName = "almight_user_idps";
@@ -52,7 +56,7 @@ export class AuthenticationApp implements IAuthenticationApp {
 
     getFrame(provider: string): IAuthenticationFrame {
         const idp = IDENTITY_PROVIDERS[provider];
-        return new this.webVersionFrameMap[idp.webVersion]();
+        return new this.webVersionFrameMap[idp.webVersion](this.configs);
     }
 
     webVersionFrameMap: Record<number, Class<IAuthenticationFrame>> = {
@@ -70,6 +74,7 @@ export class AuthenticationApp implements IAuthenticationApp {
         this.onSuccessCallback = options.onSuccessCallback ?? this.deadFunction;
         this.onFailureCallback = options.onFailureCallback ?? this.deadFunction;
         this.baseAuthenticationURL = options.baseAuthenticaionURL ?? this.baseAuthenticationURL;
+        this.configs = options.configs;
 
         // TODO: need the below line to load token as variable from localstorage [JUST FOR TESTING]
         this.storage.getItem<string>("auth_token").then((token) => { this.token = token })

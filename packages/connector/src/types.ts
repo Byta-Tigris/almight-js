@@ -1,5 +1,5 @@
 import WalletConnect from "@walletconnect/client";
-import { Class } from "@almight-sdk/utils";
+import { Class, Providers } from "@almight-sdk/utils";
 
 export interface NetworkData {
     name?: string,
@@ -47,6 +47,14 @@ export interface ProviderSessionStruct {
 
 export type ExternalProvider = BasicExternalProvider | WalletConnect | any;
 
+
+
+export interface SessioUpdateArguments {
+    accounts?: Address[];
+    chainId?: number
+}
+
+
 export interface ProviderChannelInterface {
 
 
@@ -60,6 +68,9 @@ export interface ProviderChannelInterface {
     checkSession(obj?: IProviderAdapter): Promise<[boolean, any | null]>;
     checkEnvironment(): Promise<boolean>;
     connect(options?: any, obj?: IProviderAdapter): Promise<void>;
+    onSessionUpdate(options?: SessioUpdateArguments): void;
+    bindSessionListener(obj?: IProviderAdapter): void;
+    defaultbindSessionListener(): void;
     checkConnection(obj?: IProviderAdapter): Promise<boolean>;
     ping(data?: { method?: string, obj?: IProviderAdapter }): Promise<boolean>;
     request<T = any>(data: ProviderRequestMethodArguments, timeout?: number): Promise<T>
@@ -90,40 +101,15 @@ export enum ConnectorType {
 }
 
 export interface SubscriptionCallback {
-    (payload: any): void;
-    (error: Error, payload: any | null): void;
+   (...args: any[]): void;
 }
-export interface IBaseProvider {
 
-
-
-    /**
-     * Check the connection of session is valid and working
-     * @param session 
-     */
-    checkConnection(): Promise<boolean>;
-
-    /**
-     * 
-     * Returns result from provider request
-     * 
-     * Makes JSON RPC request through provider using the session
-     * @param data
-     * 
-     */
-    request<T = any>(data: ProviderRequestMethodArguments): Promise<T>;
-
-    /**
-     * Method to subscribe events 
-     */
-    on(name: string, callback: SubscriptionCallback): void;
-
-
-
-}
 
 
 export interface IProviderAdapter {
+
+
+    getProvider<T = any>(): T;
 
     isConnected(): boolean;
 
@@ -137,6 +123,7 @@ export interface IProviderAdapter {
     channelCheckSession?: (session: any) => Promise<[boolean, unknown]>;
     channelPing? :(options?: any) => Promise<boolean>;
     channelOnConnect?: (options?: any) => void;
+    channelbindSessionListener?: () => void;
     on(event: string, callback: SubscriptionCallback): void;
 
     request<T>(data: ProviderRequestMethodArguments, timeout?: number): Promise<T>;
@@ -162,7 +149,7 @@ export interface IdentityProviderInterface {
     allowedConnectorTypes: Array<ConnectorType>;
 
     // chainId or unique id for web2 providers
-    identifier: string | number;
+    identifier: string | number | Providers;
 
     // Meta Datas such as icon, name, url , etc
     metaData: Record<string, any>;
@@ -224,12 +211,12 @@ export interface RequestReturnType {}
 
 export interface IProtocolDefinition {
 
-    adapter?: IProviderAdapter;
+    // adapter?: IProviderAdapter;
     chainIds: number[];
 
-    bindAdapter(adapter: IProviderAdapter): void;
+    // bindAdapter(adapter: IProviderAdapter): void;
 
-    request<T = any>(args: ProviderRequestMethodArguments): Promise<T>;
+    // request<T = any>(args: ProviderRequestMethodArguments): Promise<T>;
 
     sendTransaction(data: TransactionData): Promise<TransactionReturnType>;
 
@@ -237,14 +224,12 @@ export interface IProtocolDefinition {
 
     signPersonalMessage(data: SignMessageArgument): Promise<SignMessageReturnType>;
 
-    sign(data: SignMessageArgument): Promise<SignMessageReturnType>;
-
-    signTypedData(data: SignMessageArgument): Promise<SignMessageReturnType>;
 
     getNetworkId(): Promise<RequestReturnType>;
     getChainId(): Promise<RequestReturnType>;
     getAccounts(): Promise<AccountsReturnType>;
     getBalance(): Promise<BalanceReturnType>;
+    getTransactionCount(): Promise<number>;
 
 
 

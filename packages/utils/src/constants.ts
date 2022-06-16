@@ -1,8 +1,14 @@
 
-
+// Inst: Upon adding any new provider one will have to add it in
+// @almight-sdk/utils/contants::META_DATA_SET
+// @almight-sdk/connector/identity_provider::IDENTITY_PROVIDERS
+// buster/authentication/providers::Provider
+// buster/authentication/proviers::WEB3_PROVIDERS
+// buster/authentication/providers::WEB2_PROVIDERS
 export enum Providers {
     MetaMask = "metamask",
-    KardiaChain = "kardiachain"
+    KardiaChain = "kardiachain",
+    Coinbase = "coinbase"
 }
 
 export interface IMetaDataSet {
@@ -33,5 +39,11 @@ export const META_DATA_SET: Record<string, IMetaDataSet> = {
         url: "https://walletconnect.com/",
         icon: "https://seeklogo.com/images/W/walletconnect-logo-EE83B50C97-seeklogo.com.png",
         identifier: "walletconnect"
+    },
+    [Providers.Coinbase]: {
+        icon: "https://pngset.com/images/coinbase-wallet-crypto-dapp-facebook-messenger-round-icon-moon-outer-space-night-astronomy-transparent-png-2620840.png",
+        name: "Coinbase Wallet",
+        url: "https://www.coinbase.com/wallet",
+        identifier: Providers.Coinbase
     }
 }

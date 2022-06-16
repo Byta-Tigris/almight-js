@@ -1,9 +1,13 @@
 {
   "name": "@almight-sdk/auth",
-  "version": "0.0.0",
+  "version":"0.0.1-alpha.98",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "> TODO: description",
   "author": "Piyush Jaiswal <iampiyushjaiswal103@gmail.com>",
   "homepage": "https://github.com/Byta-Tigris/almight-js#readme",
+  "private": false,
   "license": "ISC",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -26,9 +30,9 @@
     "url": "https://github.com/Byta-Tigris/almight/issues"
   },
   "dependencies": {
-    "@almight-sdk/connector": "^0.0.0",
-    "@almight-sdk/core": "^0.0.0",
-    "@almight-sdk/utils": "^0.0.0",
+    "@almight-sdk/connector": "^0.0.1-alpha.98",
+    "@almight-sdk/core": "^0.0.1-alpha.98",
+    "@almight-sdk/utils": "^0.0.1-alpha.98",
     "axios": "^0.27.2",
     "bn.js": "^5.2.1",
     "dotenv": "^16.0.1"

@@ -1,11 +1,12 @@
 {
   "name": "@almight-sdk/utils",
-  "version": "0.0.0",
+  "version":"0.0.1-alpha.98",
   "description": "> TODO: description",
   "author": "Piyush Jaiswal <iampiyushjaiswal103@gmail.com>",
   "homepage": "https://github.com/Byta-Tigris/almight-js#readme",
   "license": "ISC",
   "main": "lib/index.js",
+  "private": false,
   "directories": {
     "lib": "lib",
     "test": "__tests__"
